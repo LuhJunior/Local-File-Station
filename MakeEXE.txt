@@ -1,0 +1,1 @@
+gcc Client\Client.c Server\Servidor.c Tools.c Station.c -o Station -lws2_32
