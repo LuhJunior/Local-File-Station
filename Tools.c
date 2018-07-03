@@ -24,7 +24,6 @@ void Menu(){
     printf("comandos: \n");
     printf("  buscar - para buscar um arquivo;\n");
     printf("  servidor consulta - para adicionar o IP do servidor de consulta;\n");
-    printf("  criar cache - cria um novo arquivo txt para adicionar nome de arquivos disponiveis para tranferencia;\n");
     printf("  cache - para adicionar um arquivo disponivel para tranferencia no cache;\n");
     printf("  iniciar servidor - liga o servidor para atender um certo numero de requisicoes;\n");
     printf("  ajuda - para imprimir esse menu;\n");
