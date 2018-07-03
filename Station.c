@@ -19,6 +19,8 @@ int main(int argc, char **argv){
         else if(!strcmp(command, "cache")){
             printf("Nome do arquivo: ");
             fgets(nome, 20, stdin);
+            nome[strlen(nome)-1] = '\0';
+            fflush(stdin);
             AddNoCache("cache.txt", nome);
         }
         else if(!strcmp(command, "servidor consulta")){

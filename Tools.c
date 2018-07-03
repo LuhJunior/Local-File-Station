@@ -22,9 +22,10 @@ void Menu(){
     printf("-------------------------------------------------------------------------------\n");
     printf("-------------------------------------------------------------------------------\n\n");
     printf("comandos: \n");
-    printf("  buscar - para buscar um arquivo\n");
-    printf("  servidor consulta - para adicionar o IP do servidor de consulta\n");
-    printf("  cache - para adicionar um arquivo disponivel para tranferencia no cache\n");
+    printf("  buscar - para buscar um arquivo;\n");
+    printf("  servidor consulta - para adicionar o IP do servidor de consulta;\n");
+    printf("  criar cache - cria um novo arquivo txt para adicionar nome de arquivos disponiveis para tranferencia;\n");
+    printf("  cache - para adicionar um arquivo disponivel para tranferencia no cache;\n");
     printf("  iniciar servidor - liga o servidor para atender um certo numero de requisicoes;\n");
     printf("  ajuda - para imprimir esse menu;\n");
     printf("  sair - para voltar ao menu anterior.\n\n");
@@ -42,6 +43,20 @@ int MyPow(int x, int y){
     if(y == 0) return 1;
     for(int i=1; i<y; i++) r*=x;
     return r;
+}
+
+void CriarCache(){
+    char r;
+    FILE *f = fopen("cache.txt", "r");
+    if(f == NULL) fclose(fopen("cache.txt", "w"));
+    else{
+        printf("Voce ja possui um cache criado deseja apaga-lo? (S/N)\n");
+        do{
+            r = getchar();
+            r = toupper(r);
+        }while(r != 'S' || r != 'N' );
+        if(r == 'S') fclose(fopen("cache.txt", "w"));
+    }
 }
 
 int AbrirCache(char *cache, char s[][50]){
@@ -65,7 +80,7 @@ int AbrirCache(char *cache, char s[][50]){
 void AddNoCache(char *cache, char *s){
     FILE *f;
     f = fopen(cache, "a");
-    if(f != NULL) fprintf(f, "%s", s);
+    if(f != NULL) fprintf(f, "%s\n", s);
     else printf("Ocorreu um erro ao tentar abrir o cache.\n");
     fclose(f);
 }
@@ -86,7 +101,7 @@ void ReadServerIP(char *ip){
 
 void AddServidorConsulta(){
     FILE *f;
-    char s[10];
+    char s[50];
     ReadServerIP(s);
     f = fopen("consulta.txt", "w");
     if(f != NULL) fprintf(f, "%s", s);
@@ -121,9 +136,9 @@ int MyAtoi(char *s, int tam){
 }
 
 void LerIPsDoBloco(char *block, char *ipS, char *ipC, char *tipo){
-    strncpy(ipS, block, 4);
+    MYCOPY(ipS, block, 4);
     ipS[4]='\0';
-    strncpy(ipC, block+4, 4);
+    MYCOPY(ipC, block+4, 4);
     ipC[4]='\0';
     *tipo = block[8];
 }

@@ -36,6 +36,8 @@ void AddServidorConsulta();
 
 bool VerificarNome(char *, char [][50], int);
 
+void CriarCache();
+
 int AbrirCache(char *, char [][50]);
 
 void AddNoCache(char *, char *);

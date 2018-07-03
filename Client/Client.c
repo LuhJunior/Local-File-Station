@@ -42,13 +42,13 @@ void IniciarVariaveisRequisicao(char *block, char *ipServidor, char *ipCliente, 
     memset(block, 0, BUFFER_SIZE);// limpa o buffer
     MyItoa(ipServidor, ipS, 4);
     MyItoa(ipCliente, ipC, 4);
-    printf("%i\n%i\n", ipS, ipC);
-    *tipo = '1';
-    *vida = '4';
+    printf("IP do Servidor: %i\nIP do Cliente: %i\n", ipS, ipC);
+    *tipo = 1;
+    *vida = 4;
 }
 
 bool ReceberBlocoResposta(char *block, char *NomeArquivo, int remote_socket, struct sockaddr_in *remote_address){
-    char ipS[10], ipC[10], IpNext[10], tipo, vida = '4';
+    char ipS[10], ipC[10], IpNext[10], tipo, vida = 4;
     char **BLOCO = NULL;
     int  sequence = 0, message_length = 0,  tam = 0, padding = 0;
 
@@ -56,7 +56,7 @@ bool ReceberBlocoResposta(char *block, char *NomeArquivo, int remote_socket, str
     while(recv(remote_socket, block, BUFFER_SIZE, 0) == SOCKET_ERROR) printf("Erro ao receber o bloco %i\nTentando novamente\n", sequence);
 
     LerIPsDoBloco(block, ipS, ipC, &tipo);
-    if(tipo == '2'){
+    if(tipo == 2){
         sequence = MyAtoi(block+9, 2);
         tam = MyAtoi(block+11, 4);
         padding = MyAtoi(block+1039, 2);
@@ -75,9 +75,9 @@ bool ReceberBlocoResposta(char *block, char *NomeArquivo, int remote_socket, str
             memset(BLOCO[sequence], 0, 1024);
             MYCOPY(BLOCO[sequence], block+15, 1024);
         }
-        if(tam%1024){
+        if(tam>1024 && tam%1024){
             memset(block, 0, BUFFER_SIZE);
-            while(recv(remote_socket, block, BUFFER_SIZE, 0) == SOCKET_ERROR) printf("Erro ao receber o bloco %i\n tentando novamente", sequence);
+            while(recv(remote_socket, block, BUFFER_SIZE, 0) == SOCKET_ERROR) printf("Erro ao receber o bloco %i\n Tentando novamente", sequence);
             LerIPsDoBloco(block, ipS, ipC, &tipo);
             sequence = MyAtoi(block+9, 2);
             tam = MyAtoi(block+11, 4);
@@ -90,12 +90,12 @@ bool ReceberBlocoResposta(char *block, char *NomeArquivo, int remote_socket, str
         if(CriarArquivo(NomeArquivo, BLOCO, sequence+1, padding)) printf("\nArquivo recebido com sucesso!\n\n");
         return true;
     }
-    else if(tipo == '3'){
+    else if(tipo == 3){
         printf("O Servidor nao possui o arquivo\n");
         printf("buscando no proximo servidor\n");
         closesocket(remote_socket);
         vida--;
-        if(vida > '0'){
+        if(vida > 0){
             MYCOPY(ipS, block, 4);
             MYCOPY(ipC, block+4, 4);
             tipo = block[8];
@@ -127,7 +127,7 @@ bool ReceberBlocoResposta(char *block, char *NomeArquivo, int remote_socket, str
 bool BuscarArquivoNoSevidor(char *NomeArquivo){
     char block[BUFFER_SIZE];
     char remote_ip[32], ipServidor[10], ipCliente[10], ipProx[10];
-    char tipo, r, vida = '4';
+    char tipo, vida = 4;
     int remote_socket = 0, message_length = 0;
     unsigned short remote_port = PORT;
     struct sockaddr_in remote_address;
