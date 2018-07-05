@@ -44,4 +44,6 @@ void AddNoCache(char *, char *);
 
 void ReadServerIP(char *);
 
+void inverte(char *, int);
+
 #endif // TOOLS_H

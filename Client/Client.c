@@ -15,7 +15,7 @@ void MenuCliente(){
 bool CriarArquivo(char *Nome, char **BLOCO, int Tamanho, int Padding){
     FILE *f = fopen(Nome, "wb");
     for(int i=0; i<Tamanho; i++){
-        if(i == Tamanho-1) fwrite(BLOCO[i], 1, Padding, f);
+        if(i == Tamanho-1) fwrite(BLOCO[i], 1, 1024-Padding, f);
         else fwrite(BLOCO[i], 1, 1024, f);
     }
     fclose(f);
@@ -56,10 +56,11 @@ bool ReceberBlocoResposta(char *block, char *NomeArquivo, int remote_socket, str
     while(recv(remote_socket, block, BUFFER_SIZE, 0) == SOCKET_ERROR) printf("Erro ao receber o bloco %i\nTentando novamente\n", sequence);
 
     LerIPsDoBloco(block, ipS, ipC, &tipo);
-    if(tipo == 2){
+    if(tipo == 2 || tipo == '2'){
         sequence = MyAtoi(block+9, 2);
         tam = MyAtoi(block+11, 4);
         padding = MyAtoi(block+1039, 2);
+        printf("tamanho:%i\n", tam);
         BLOCO = (char **) malloc(sizeof(char *) * (tam/1024 + (tam%1024>0)));
         BLOCO[sequence] = (char *) malloc(1024);
         memset(BLOCO[sequence], 0, 1024);
@@ -86,7 +87,7 @@ bool ReceberBlocoResposta(char *block, char *NomeArquivo, int remote_socket, str
             memset(BLOCO[sequence], 0, 1024);
             MYCOPY(BLOCO[sequence], block+15, padding);
         }
-        printf("%i\n", sequence);
+        printf("Sequence: %i\n", sequence);printf("Padding: %i\n", padding);printf("Tamanho: %i\n", tam);
         if(CriarArquivo(NomeArquivo, BLOCO, sequence+1, padding)) printf("\nArquivo recebido com sucesso!\n\n");
         return true;
     }
@@ -122,6 +123,8 @@ bool ReceberBlocoResposta(char *block, char *NomeArquivo, int remote_socket, str
             return false;
         }
     }
+    else printf("Tipo nao reconhecido: (%i) ...\n", tipo);
+    return false;
 }
 
 bool BuscarArquivoNoSevidor(char *NomeArquivo){

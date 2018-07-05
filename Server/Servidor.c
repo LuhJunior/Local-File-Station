@@ -41,6 +41,7 @@ void preencherBlocoNegativa(char* block, char* ipServidor, char* ipCliente, char
 }
 
 void EnviarBlocos(char *NomeArquivo, char *ipS, char *ipC, int remote_socket){
+    printf("Reposta Positiva\n");
     FILE *f = fopen(NomeArquivo, "rb");
     char block[BUFFER_SIZE];
     int tam = 0, sequence = 0;
@@ -50,7 +51,7 @@ void EnviarBlocos(char *NomeArquivo, char *ipS, char *ipC, int remote_socket){
         rewind(f);
         while(!feof(f)){
             memset(block, 0, BUFFER_SIZE);
-            preencherBlocoPositiva(block, f, ipS, ipC, 2, sequence++, tam);
+            preencherBlocoPositiva(block, f, ipS, ipC, '2', sequence++, tam);
             while(send(remote_socket, block, BUFFER_SIZE, 0) == SOCKET_ERROR) printf("Erro ao enviar bloco de resposta\nTentando enviar novamente\n");
         }
         fclose(f);
@@ -58,7 +59,7 @@ void EnviarBlocos(char *NomeArquivo, char *ipS, char *ipC, int remote_socket){
     }
     else{
         memset(block, 0, BUFFER_SIZE);
-        preencherBlocoNegativa(block, ipS, ipC, 3);
+        preencherBlocoNegativa(block, ipS, ipC, '3');
         while(send(remote_socket, block, BUFFER_SIZE, 0) == SOCKET_ERROR) printf("Erro ao enviar bloco de resposta\nTentando enviar novamente\n");
     }
 }
@@ -129,12 +130,17 @@ bool Server(){
     vida = block[9];
     MYCOPY(nomeArquivo, block+10, 20);
     nomeArquivo[20] = '\0';
-    if(tipo == 1){
+    printf("Servidor: %i\n", MyAtoi(ipServidor, 4));
+    printf("Cliente: %i\n", MyAtoi(ipCliente, 4));
+    printf("%s\n", nomeArquivo);
+    printf("tipo:%c\n", tipo);
+    if(tipo == '1'){
         tam = AbrirCache("cache.txt", Arquivos);
         if(VerificarNome(nomeArquivo, Arquivos, tam)) EnviarBlocos(nomeArquivo, ipServidor, ipCliente, remote_socket);
         else{
+            printf("Resposta negativa\n");
             memset(block, 0, BUFFER_SIZE);
-            preencherBlocoNegativa(block, ipServidor, ipCliente, 3);
+            preencherBlocoNegativa(block, ipServidor, ipCliente, '3');
             while(send(remote_socket, block, BUFFER_SIZE, 0) == SOCKET_ERROR)printf("Erro ao enviar bloco de resposta negativa\nTentando enviar novamente\n");
         }
     }

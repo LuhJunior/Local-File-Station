@@ -5,6 +5,12 @@ void msg_err_exit(char *msg){
     fprintf(stderr, msg);
 }
 
+void inverte(char *s, int tam){
+    char ax[tam+1];
+    strncpy(ax, s, tam);
+    for(int i=0; i<tam; i++) s[i] = ax[(tam-i)-1];
+}
+
 void MYCOPY(char *s, char *s2, int tam){
     for(int i=0; i<tam; i++) s[i] = s2[i];
 }
