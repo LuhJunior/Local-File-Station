@@ -1,5 +1,5 @@
 eoq.txt
 teste.txt
 exemplo.c
-teste2.txt
+eu.jpg
 Mag.mp3

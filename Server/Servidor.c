@@ -22,7 +22,7 @@ void preencherBlocoPositiva(char* block, FILE *f, char* ipServidor, char* ipClie
     MyItoa(block+11, tam, 4);
     fread(block+15, 1, 1024, f);
     padding = 1024*(sequence+1) - ftell(f);
-    memset(block+(1038-padding), 0, padding);
+    memset(block+(1039-padding), 0, padding);
     MyItoa(block+1039, padding, 2);
 }
 
@@ -51,7 +51,7 @@ void EnviarBlocos(char *NomeArquivo, char *ipS, char *ipC, int remote_socket){
         rewind(f);
         while(!feof(f)){
             memset(block, 0, BUFFER_SIZE);
-            preencherBlocoPositiva(block, f, ipS, ipC, '2', sequence++, tam);
+            preencherBlocoPositiva(block, f, ipS, ipC, 2, sequence++, tam);
             while(send(remote_socket, block, BUFFER_SIZE, 0) == SOCKET_ERROR) printf("Erro ao enviar bloco de resposta\nTentando enviar novamente\n");
         }
         fclose(f);
@@ -59,7 +59,7 @@ void EnviarBlocos(char *NomeArquivo, char *ipS, char *ipC, int remote_socket){
     }
     else{
         memset(block, 0, BUFFER_SIZE);
-        preencherBlocoNegativa(block, ipS, ipC, '3');
+        preencherBlocoNegativa(block, ipS, ipC, 3);
         while(send(remote_socket, block, BUFFER_SIZE, 0) == SOCKET_ERROR) printf("Erro ao enviar bloco de resposta\nTentando enviar novamente\n");
     }
 }
@@ -134,13 +134,13 @@ bool Server(){
     printf("Cliente: %i\n", MyAtoi(ipCliente, 4));
     printf("%s\n", nomeArquivo);
     printf("tipo:%c\n", tipo);
-    if(tipo == '1'){
+    if(tipo == 1){
         tam = AbrirCache("cache.txt", Arquivos);
         if(VerificarNome(nomeArquivo, Arquivos, tam)) EnviarBlocos(nomeArquivo, ipServidor, ipCliente, remote_socket);
         else{
             printf("Resposta negativa\n");
             memset(block, 0, BUFFER_SIZE);
-            preencherBlocoNegativa(block, ipServidor, ipCliente, '3');
+            preencherBlocoNegativa(block, ipServidor, ipCliente, 3);
             while(send(remote_socket, block, BUFFER_SIZE, 0) == SOCKET_ERROR)printf("Erro ao enviar bloco de resposta negativa\nTentando enviar novamente\n");
         }
     }
