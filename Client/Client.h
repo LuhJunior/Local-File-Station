@@ -27,9 +27,11 @@ void LerNomeArquivo(char *);
 
 void IniciarVariaveisRequisicao(char *, char *, char *, int, int, char *, char *);
 
+void IniciarVariaveisRequisicaoNegativa(char *, char *, char *, int, int, char *);
+
 void LerIPsDoBloco(char *, char *, char *, char *);
 
-bool ReceberBlocoResposta(char *, char *, int, struct sockaddr_in *);
+bool ReceberBlocoResposta(char *, char *, int, struct sockaddr_in *, char);
 
 bool BuscarArquivo();
 

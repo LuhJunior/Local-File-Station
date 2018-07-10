@@ -47,10 +47,19 @@ void IniciarVariaveisRequisicao(char *block, char *ipServidor, char *ipCliente, 
     *vida = 4;
 }
 
-bool ReceberBlocoResposta(char *block, char *NomeArquivo, int remote_socket, struct sockaddr_in *remote_address){
-    char ipS[10], ipC[10], IpNext[10], tipo, vida = 4;
+void IniciarVariaveisRequisicaoNegativa(char *block, char *ipServidor, char *ipCliente, int ipS, int ipC, char *tipo){
+    memset(block, 0, BUFFER_SIZE);// limpa o buffer
+    MyItoa(ipServidor, ipS, 4);
+    MyItoa(ipCliente, ipC, 4);
+    printf("IP do Servidor: %i\nIP do Cliente: %i\n", ipS, ipC);
+    *tipo = 1;
+}
+
+bool ReceberBlocoResposta(char *block, char *NomeArquivo, int remote_socket, struct sockaddr_in *remote_address, char vida){
+    char ipS[10], ipC[10], tipo;
     char **BLOCO = NULL;
-    int  sequence = 0, message_length = 0,  tam = 0, padding = 0;
+    int  sequence = 0, message_length = 0,  tam = 0, padding = 0, IpNext = 0;
+    struct sockaddr_in prox_address;
 
     memset(block, 0, BUFFER_SIZE);
     while(recv(remote_socket, block, BUFFER_SIZE, 0) == SOCKET_ERROR) printf("Erro ao receber o bloco %i\nTentando novamente\n", sequence);
@@ -100,23 +109,29 @@ bool ReceberBlocoResposta(char *block, char *NomeArquivo, int remote_socket, str
             MYCOPY(ipS, block, 4);
             MYCOPY(ipC, block+4, 4);
             tipo = block[8];
-            MYCOPY(IpNext, block+9, 4);
-            memset(remote_address, 0, sizeof(*remote_address));
-            remote_address->sin_family = AF_INET;
-            remote_address->sin_addr.s_addr = inet_addr(IpNext);
-            remote_address->sin_port = htons(PORT);
-            if (connect(remote_socket, (struct sockaddr *) &remote_address, sizeof(*remote_address)) == SOCKET_ERROR){
+            IpNext = MyAtoi(block+9, 4);
+            printf("IP Proximo: %i\n", IpNext);
+            remote_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+            memset(&prox_address, 0, sizeof(prox_address));
+            prox_address.sin_family = AF_INET;
+            prox_address.sin_addr.s_addr = IpNext;
+            prox_address.sin_port = htons(PORT);
+            if (remote_socket == INVALID_SOCKET) {
+                msg_err_exit("Ocorreu um erro: socket() failed\nFinalizando ...\n");
+                return false;
+            }
+            if (connect(remote_socket, (struct sockaddr *) &prox_address, sizeof(prox_address)) == SOCKET_ERROR){
                 msg_err_exit("Ocorreu um erro: connect() failed\nFinalizando ...\n");
                 return false;
             }
 
-            IniciarVariaveisRequisicao(block, ipS, ipC, remote_address->sin_addr.s_addr, inet_addr("127.0.0.1"), &tipo, &vida);
+            IniciarVariaveisRequisicaoNegativa(block, ipS, ipC, prox_address.sin_addr.s_addr, inet_addr("127.0.0.1"), &tipo);
 
             PreencherBlocoRequisicao(block, ipS, ipC, tipo, vida, NomeArquivo);
 
             while(send(remote_socket, block, BUFFER_SIZE, 0) == SOCKET_ERROR) printf("Erro ao enviar bloco de requisicao tentando novamente");
 
-            return ReceberBlocoResposta(block, NomeArquivo, remote_socket, remote_address);
+            return ReceberBlocoResposta(block, NomeArquivo, remote_socket, &prox_address, vida);
         }
         else {
             printf("Nenhum dos Servidores possui o arquivo ...\n");
@@ -172,7 +187,7 @@ bool BuscarArquivoNoSevidor(char *NomeArquivo){
     // envia a requisicao para o servidor
     while(send(remote_socket, block, BUFFER_SIZE, 0) == SOCKET_ERROR) printf("Erro ao enviar bloco de requisicao\nTentando enviar novamente\n");
 
-    return ReceberBlocoResposta(block, NomeArquivo, remote_socket, &remote_address);
+    return ReceberBlocoResposta(block, NomeArquivo, remote_socket, &remote_address, 4);
 }
 
 bool BuscarArquivo(){
